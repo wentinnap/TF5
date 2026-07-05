@@ -145,3 +145,4 @@ win rate/expectancy จริงก่อนเชื่อตัวเลขเ
 - `/dashboard` — win rate, expectancy, equity curve, ประวัติเทรด
 "# TF5" 
 "# TF5" 
+"# TF5" 
