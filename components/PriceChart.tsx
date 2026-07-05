@@ -27,9 +27,9 @@ export default function PriceChart({
   takeProfit,
 }: {
   symbol: string;
-  entryPrice: number;
-  stopLoss: number;
-  takeProfit: number;
+  entryPrice?: number;
+  stopLoss?: number;
+  takeProfit?: number;
 }) {
   const [data, setData] = useState<ChartPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -69,10 +69,16 @@ export default function PriceChart({
         <Line type="monotone" dataKey="emaFast" name="EMA50" stroke="#fbbf24" strokeWidth={1} dot={false} />
         <Line type="monotone" dataKey="emaSlow" name="EMA200" stroke="#818cf8" strokeWidth={1} dot={false} />
 
-        {/* จุดเข้า / SL / TP */}
-        <ReferenceLine y={entryPrice} stroke="#e7ebf1" strokeDasharray="4 4" label={{ value: "Entry", fill: "#e7ebf1", fontSize: 11, position: "insideTopRight" }} />
-        <ReferenceLine y={stopLoss} stroke="#f87171" strokeDasharray="4 4" label={{ value: "SL", fill: "#f87171", fontSize: 11, position: "insideBottomRight" }} />
-        <ReferenceLine y={takeProfit} stroke="#2dd4bf" strokeDasharray="4 4" label={{ value: "TP", fill: "#2dd4bf", fontSize: 11, position: "insideTopRight" }} />
+        {/* จุดเข้า / SL / TP — แสดงเฉพาะตอนมี signal จริง */}
+        {entryPrice != null && (
+          <ReferenceLine y={entryPrice} stroke="#e7ebf1" strokeDasharray="4 4" label={{ value: "Entry", fill: "#e7ebf1", fontSize: 11, position: "insideTopRight" }} />
+        )}
+        {stopLoss != null && (
+          <ReferenceLine y={stopLoss} stroke="#f87171" strokeDasharray="4 4" label={{ value: "SL", fill: "#f87171", fontSize: 11, position: "insideBottomRight" }} />
+        )}
+        {takeProfit != null && (
+          <ReferenceLine y={takeProfit} stroke="#2dd4bf" strokeDasharray="4 4" label={{ value: "TP", fill: "#2dd4bf", fontSize: 11, position: "insideTopRight" }} />
+        )}
       </ComposedChart>
     </ResponsiveContainer>
   );

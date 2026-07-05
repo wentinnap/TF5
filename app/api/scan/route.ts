@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const interval = process.env.FOREX_INTERVAL ?? "1day"; // TF ยาว: ค่าเริ่มต้นเป็นรายวัน
+  const interval = process.env.FOREX_INTERVAL ?? "1h"; // TF เริ่มต้น: 1 ชั่วโมง
   const outputsize = parseInt(process.env.FOREX_OUTPUTSIZE ?? "400", 10);
 
   for (const symbol of symbols) {
