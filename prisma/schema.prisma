@@ -1,0 +1,47 @@
+// Prisma schema — ฐานข้อมูล Postgres (ใช้ผ่าน Supabase)
+// วิธีสร้างตารางจริงในฐานข้อมูล: รันคำสั่ง `npx prisma db push` หลังตั้งค่า DATABASE_URL แล้ว
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// สถานะของแต่ละ signal ที่ระบบยิงออกมา
+enum SignalStatus {
+  OPEN // ยังไม่ถึง TP หรือ SL
+  WIN // ราคาชน TP แล้ว
+  LOSS // ราคาชน SL แล้ว
+  CANCELLED // ยกเลิกด้วยมือ / error
+}
+
+enum Direction {
+  BUY
+  SELL
+}
+
+model Signal {
+  id           String       @id @default(cuid())
+  symbol       String // เช่น "EUR/USD"
+  direction    Direction
+  entryPrice   Float
+  stopLoss     Float
+  takeProfit   Float
+  rsi          Float // ค่า RSI ตอนเกิด signal (เก็บไว้ debug/วิเคราะห์ย้อนหลัง)
+  atr          Float // ค่า ATR ตอนเกิด signal (ใช้คำนวณ SL)
+  adx          Float @default(0) // ความแรงเทรนด์ตอนเกิด signal (ADX > 25 = เทรนด์ชัด)
+  emaFast      Float
+  emaSlow      Float
+  reason       String // คำอธิบายสั้นๆ ว่าทำไมถึงเข้า (เก็บ log เหตุผล)
+  status       SignalStatus @default(OPEN)
+  closePrice   Float? // ราคาที่ปิดจริง (เมื่อ WIN/LOSS)
+  closedAt     DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+}
