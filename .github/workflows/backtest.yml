@@ -1,0 +1,47 @@
+name: forex-signal-backtest
+
+# กดรันมือได้จากแท็บ Actions บนเว็บ GitHub — ใส่คู่เงิน/TF/จำนวนแท่งเองได้ทุกครั้ง
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: "คู่เงินที่จะทดสอบ เช่น EUR/USD, GBP/USD, XAU/USD"
+        required: true
+        default: "EUR/USD"
+      interval:
+        description: "Time frame เช่น 15min, 1h, 4h, 1day"
+        required: true
+        default: "1h"
+      outputsize:
+        description: "จำนวนแท่งย้อนหลัง (ยิ่งมาก ยิ่งทดสอบได้นานขึ้น)"
+        required: true
+        default: "2000"
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ข้าม postinstall (prisma generate) เพราะ backtest ไม่แตะฐานข้อมูลเลย ไม่ต้องมี DATABASE_URL
+      - name: ติดตั้ง dependencies
+        run: npm install --ignore-scripts
+
+      - name: รัน backtest
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: |
+          npm run backtest -- "${{ github.event.inputs.symbol }}" "${{ github.event.inputs.interval }}" "${{ github.event.inputs.outputsize }}" | tee backtest-output.txt
+
+      # โชว์ผลลัพธ์ในหน้า Summary ของ run นั้นเลย ไม่ต้องไปไล่ดูใน log
+      - name: แสดงผลใน Summary
+        if: always()
+        run: |
+          echo "## ผลทดสอบย้อนหลัง: ${{ github.event.inputs.symbol }} (TF ${{ github.event.inputs.interval }})" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat backtest-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
