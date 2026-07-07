@@ -23,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="nav">
               <a href="/">สัญญาณล่าสุด</a>
               <a href="/chart">กราฟราคา</a>
+              <a href="/diagnose">ตรวจสอบเงื่อนไข</a>
               <a href="/dashboard">สถิติ</a>
             </nav>
           </header>
