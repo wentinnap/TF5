@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { StrategySignal } from "./strategy";
 import type { Signal } from "@prisma/client";
+import { formatPrice } from "./format";
 
 export async function sendSignalEmail(symbol: string, signal: StrategySignal) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -23,9 +24,9 @@ export async function sendSignalEmail(symbol: string, signal: StrategySignal) {
       <div style="font-family: -apple-system, sans-serif; max-width: 480px;">
         <h2>${emoji} ${directionThai} ${symbol}</h2>
         <table style="border-collapse: collapse; width: 100%;">
-          <tr><td style="padding:6px 0;color:#666;">ราคาเข้า (Entry)</td><td style="text-align:right;font-weight:bold;">${signal.entryPrice.toFixed(5)}</td></tr>
-          <tr><td style="padding:6px 0;color:#666;">Stop Loss</td><td style="text-align:right;color:#c0392b;">${signal.stopLoss.toFixed(5)}</td></tr>
-          <tr><td style="padding:6px 0;color:#666;">Take Profit</td><td style="text-align:right;color:#27ae60;">${signal.takeProfit.toFixed(5)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">ราคาเข้า (Entry)</td><td style="text-align:right;font-weight:bold;">${formatPrice(symbol, signal.entryPrice)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Stop Loss</td><td style="text-align:right;color:#c0392b;">${formatPrice(symbol, signal.stopLoss)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">Take Profit</td><td style="text-align:right;color:#27ae60;">${formatPrice(symbol, signal.takeProfit)}</td></tr>
           <tr><td style="padding:6px 0;color:#666;">RSI</td><td style="text-align:right;">${signal.rsi.toFixed(1)}</td></tr>
           <tr><td style="padding:6px 0;color:#666;">ATR</td><td style="text-align:right;">${signal.atr.toFixed(5)}</td></tr>
         </table>
@@ -65,8 +66,8 @@ export async function sendResultEmail(
         <h2 style="color:${color};">${emoji} ${signal.symbol} — ${label}</h2>
         <table style="border-collapse: collapse; width: 100%;">
           <tr><td style="padding:6px 0;color:#666;">ทิศทาง</td><td style="text-align:right;font-weight:bold;">${signal.direction}</td></tr>
-          <tr><td style="padding:6px 0;color:#666;">ราคาเข้า</td><td style="text-align:right;">${signal.entryPrice.toFixed(5)}</td></tr>
-          <tr><td style="padding:6px 0;color:#666;">ราคาปิด</td><td style="text-align:right;font-weight:bold;color:${color};">${signal.closePrice?.toFixed(5)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">ราคาเข้า</td><td style="text-align:right;">${formatPrice(signal.symbol, signal.entryPrice)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;">ราคาปิด</td><td style="text-align:right;font-weight:bold;color:${color};">${signal.closePrice != null ? formatPrice(signal.symbol, signal.closePrice) : "-"}</td></tr>
         </table>
         <hr style="border:none;border-top:1px solid #eee;margin:16px 0;" />
         <p style="color:#333;font-size:14px;">
