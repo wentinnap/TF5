@@ -9,7 +9,7 @@ on:
         required: true
         default: "EUR/USD"
       interval:
-        description: "Time frame เช่น 15min, 1h, 4h, 1day"
+        description: "Time frame ต้องพิมพ์เต็มรูปแบบ: 15min, 1h, 4h, 1day (ห้ามพิมพ์แค่ตัวเลข)"
         required: true
         default: "1h"
       outputsize:
@@ -35,7 +35,8 @@ jobs:
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: |
-          npm run backtest -- "${{ github.event.inputs.symbol }}" "${{ github.event.inputs.interval }}" "${{ github.event.inputs.outputsize }}" | tee backtest-output.txt
+          npm run backtest -- "${{ github.event.inputs.symbol }}" "${{ github.event.inputs.interval }}" "${{ github.event.inputs.outputsize }}" > backtest-output.txt 2>&1 || true
+          cat backtest-output.txt
 
       # โชว์ผลลัพธ์ในหน้า Summary ของ run นั้นเลย ไม่ต้องไปไล่ดูใน log
       - name: แสดงผลใน Summary
