@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PriceChart from "@/components/PriceChart";
+import { formatPrice } from "@/lib/format";
 
 type CurrentSnapshot = {
   price: number;
@@ -72,7 +73,7 @@ export default function ChartPage() {
         <div className="grid grid-4" style={{ marginBottom: 20 }}>
           <div className="card">
             <div className="stat-label">ราคาปัจจุบัน</div>
-            <div className="stat-value">{current.price.toFixed(5)}</div>
+            <div className="stat-value">{formatPrice(selected, current.price)}</div>
           </div>
           <div className="card">
             <div className="stat-label">เทรนด์ (EMA50 vs 200)</div>
