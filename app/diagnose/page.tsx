@@ -10,6 +10,8 @@ type DiagnosisRow = {
   trend?: "up" | "down";
   adx?: number;
   adxOk?: boolean;
+  slopeOk?: boolean;
+  distanceOk?: boolean;
   rsi?: number;
   pullbackOk?: boolean;
   candleConfirmOk?: boolean;
@@ -82,7 +84,9 @@ export default function DiagnosePage() {
                 <th>คู่เงิน</th>
                 <th>ราคา</th>
                 <th>เทรนด์</th>
-                <th>ADX &gt; 25</th>
+                <th>ADX &gt; 30</th>
+                <th>เทรนด์ยั่งยืน</th>
+                <th>ไม่ไล่ราคา</th>
                 <th>RSI Pullback</th>
                 <th>แท่งยืนยัน</th>
                 <th>จะออก Signal?</th>
@@ -94,11 +98,11 @@ export default function DiagnosePage() {
                 <tr key={r.symbol}>
                   <td style={{ fontWeight: 600 }}>{r.symbol}</td>
                   {r.error ? (
-                    <td colSpan={7} style={{ color: "var(--sell)" }}>
+                    <td colSpan={9} style={{ color: "var(--sell)" }}>
                       ดึงข้อมูลไม่สำเร็จ: {r.error}
                     </td>
                   ) : !r.hasEnoughData ? (
-                    <td colSpan={7} style={{ color: "var(--muted)" }}>
+                    <td colSpan={9} style={{ color: "var(--muted)" }}>
                       ข้อมูลย้อนหลังยังไม่พอคำนวณ (ต้องการอย่างน้อย ~205 แท่ง)
                     </td>
                   ) : (
@@ -109,6 +113,12 @@ export default function DiagnosePage() {
                       </td>
                       <td className="mono">
                         <CheckIcon ok={r.adxOk} /> {r.adx?.toFixed(1)}
+                      </td>
+                      <td>
+                        <CheckIcon ok={r.slopeOk} />
+                      </td>
+                      <td>
+                        <CheckIcon ok={r.distanceOk} />
                       </td>
                       <td className="mono">
                         <CheckIcon ok={r.pullbackOk} /> RSI {r.rsi?.toFixed(1)}
@@ -135,4 +145,3 @@ export default function DiagnosePage() {
     </div>
   );
 }
-
