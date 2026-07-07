@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatPrice } from "@/lib/format";
 import {
   LineChart,
   Line,
@@ -117,8 +118,8 @@ export default function Dashboard() {
                   <td style={{ color: s.status === "WIN" ? "var(--buy)" : "var(--sell)", fontWeight: 600 }}>
                     {s.status}
                   </td>
-                  <td className="mono">{s.entryPrice.toFixed(5)}</td>
-                  <td className="mono">{s.closePrice?.toFixed(5)}</td>
+                  <td className="mono">{formatPrice(s.symbol, s.entryPrice)}</td>
+                  <td className="mono">{s.closePrice != null ? formatPrice(s.symbol, s.closePrice) : "-"}</td>
                   <td className="mono" style={{ color: "var(--muted)", fontSize: 12 }}>
                     {s.closedAt ? new Date(s.closedAt).toLocaleDateString("th-TH") : "-"}
                   </td>
