@@ -26,6 +26,91 @@ const RSI_PULLBACK_HIGH = 60; // ขาลง: รอ RSI ขึ้นเกิ�
 const ADX_PERIOD = 14;
 const ADX_THRESHOLD = 25; // ต้องเทรนด์แรงเกินนี้ถึงจะพิจารณาเข้า (กรองตลาด sideway ออก)
 
+export type Diagnosis = {
+  hasEnoughData: boolean;
+  price?: number;
+  trend?: "up" | "down";
+  emaFast?: number;
+  emaSlow?: number;
+  adx?: number;
+  adxOk?: boolean;
+  rsi?: number;
+  rsiPrev?: number;
+  pullbackOk?: boolean; // RSI เพิ่งย่อ/เด้งกลับตามเทรนด์แล้วหรือยัง
+  candleConfirmOk?: boolean;
+  wouldSignal?: boolean;
+  blockedBy?: string[]; // รายการเงื่อนไขที่ยังไม่ผ่าน (ไว้โชว์ debug)
+};
+
+/**
+ * ตรวจสอบทีละเงื่อนไขว่าคู่เงินนี้ผ่าน/ไม่ผ่านอะไรบ้าง โดยไม่สร้าง signal จริง
+ * ใช้สำหรับหน้า debug ("ทำไมยังไม่มี signal") ให้เห็นสาเหตุตรงๆ แทนการเดา
+ */
+export function diagnoseConditions(candles: Candle[]): Diagnosis {
+  if (candles.length < EMA_SLOW_PERIOD + 5) {
+    return { hasEnoughData: false };
+  }
+
+  const closes = candles.map((c) => c.close);
+  const highs = candles.map((c) => c.high);
+  const lows = candles.map((c) => c.low);
+
+  const emaFastArr = ema(closes, EMA_FAST_PERIOD);
+  const emaSlowArr = ema(closes, EMA_SLOW_PERIOD);
+  const rsiArr = rsi(closes, RSI_PERIOD);
+  const adxArr = adx(highs, lows, closes, ADX_PERIOD);
+
+  const last = closes.length - 1;
+  const prev = last - 1;
+
+  const emaFastNow = emaFastArr[last];
+  const emaSlowNow = emaSlowArr[last];
+  const rsiNow = rsiArr[last];
+  const rsiPrev = rsiArr[prev];
+  const adxNow = adxArr[last];
+  const lastCandle = candles[last];
+
+  if ([emaFastNow, emaSlowNow, rsiNow, rsiPrev, adxNow].some((v) => Number.isNaN(v))) {
+    return { hasEnoughData: false };
+  }
+
+  const trend: "up" | "down" = emaFastNow > emaSlowNow ? "up" : "down";
+  const adxOk = adxNow > ADX_THRESHOLD;
+
+  const pullbackOk =
+    trend === "up"
+      ? rsiPrev < RSI_PULLBACK_LOW && rsiNow >= RSI_PULLBACK_LOW
+      : rsiPrev > RSI_PULLBACK_HIGH && rsiNow <= RSI_PULLBACK_HIGH;
+
+  const candleConfirmOk = trend === "up" ? lastCandle.close > lastCandle.open : lastCandle.close < lastCandle.open;
+
+  const blockedBy: string[] = [];
+  if (!adxOk) blockedBy.push(`ADX ${adxNow.toFixed(1)} ยังไม่เกิน ${ADX_THRESHOLD} (เทรนด์ยังไม่แรงพอ)`);
+  if (!pullbackOk)
+    blockedBy.push(
+      trend === "up"
+        ? `RSI ยังไม่เพิ่งย่อ+ดีดกลับผ่านโซน ${RSI_PULLBACK_LOW} (ตอนนี้ ${rsiNow.toFixed(1)})`
+        : `RSI ยังไม่เพิ่งเด้ง+ร่วงกลับผ่านโซน ${RSI_PULLBACK_HIGH} (ตอนนี้ ${rsiNow.toFixed(1)})`
+    );
+  if (!candleConfirmOk) blockedBy.push("แท่งเทียนล่าสุดยังไม่ปิดยืนยันทิศทางเทรนด์");
+
+  return {
+    hasEnoughData: true,
+    price: closes[last],
+    trend,
+    emaFast: emaFastNow,
+    emaSlow: emaSlowNow,
+    adx: adxNow,
+    adxOk,
+    rsi: rsiNow,
+    rsiPrev,
+    pullbackOk,
+    candleConfirmOk,
+    wouldSignal: adxOk && pullbackOk && candleConfirmOk,
+    blockedBy,
+  };
+}
+
 /**
  * วิเคราะห์แท่งเทียนแล้วคืน signal ถ้าเงื่อนไขครบ, หรือ null ถ้ายังไม่เข้าเงื่อนไข
  *
