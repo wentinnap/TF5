@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import PriceChart from "@/components/PriceChart";
+import { formatPrice } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,9 @@ export default async function Home() {
                   <div style={{ color: "var(--muted)", fontSize: 13, maxWidth: 480 }}>{s.reason}</div>
                 </div>
                 <div className="mono" style={{ fontSize: 13, textAlign: "right" }}>
-                  <div>Entry <span style={{ color: "var(--text)", fontWeight: 600 }}>{s.entryPrice.toFixed(5)}</span></div>
-                  <div>SL <span style={{ color: "var(--sell)", fontWeight: 600 }}>{s.stopLoss.toFixed(5)}</span></div>
-                  <div>TP <span style={{ color: "var(--buy)", fontWeight: 600 }}>{s.takeProfit.toFixed(5)}</span></div>
+                  <div>Entry <span style={{ color: "var(--text)", fontWeight: 600 }}>{formatPrice(s.symbol, s.entryPrice)}</span></div>
+                  <div>SL <span style={{ color: "var(--sell)", fontWeight: 600 }}>{formatPrice(s.symbol, s.stopLoss)}</span></div>
+                  <div>TP <span style={{ color: "var(--buy)", fontWeight: 600 }}>{formatPrice(s.symbol, s.takeProfit)}</span></div>
                 </div>
               </div>
               <PriceChart
